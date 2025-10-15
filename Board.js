@@ -1,4 +1,7 @@
-const startBoard = (game) => {
+const startBoard = (game, options = { playAgainst: 'human', aiColor: 'black', aiLevel: 'dumb' }) => {
+
+    const aiPlayer = options.playAgainst === 'ai' ? ai(options.aiColor) : null;
+
     const board   = document.getElementById('board');
     const squares = board.querySelectorAll('.square');
     const whiteSematary = document.getElementById('whiteSematary');
@@ -27,6 +30,13 @@ const startBoard = (game) => {
     }
 
     resetBoard();
+
+    const setGameState = state => {
+        gameState = state;
+        if (gameState === 'ai_thinking') {
+            turnSign.innerHTML += ' (thinking...)';
+        }
+    }
 
     const setAllowedSquares = (pieceImg) => {
         clickedPieceName = pieceImg.id;
@@ -62,6 +72,10 @@ const startBoard = (game) => {
     }
 
     function movePiece(square) {
+        if (gameState === 'ai_thinking') {
+            return;
+        }
+
         const position = square.getAttribute('id');
         const existedPiece = game.getPieceByPos(position);
 
@@ -96,12 +110,18 @@ const startBoard = (game) => {
 
     document.querySelectorAll('img.piece').forEach( pieceImg => {
         pieceImg.addEventListener("dragstart", function(event) {
+            if (gameState === 'ai_thinking') {
+                return;
+            }
             event.stopPropagation();
             event.dataTransfer.setData("text", event.target.id);
             clearSquares();
             setAllowedSquares(event.target)
         });
         pieceImg.addEventListener("drop", function(event) {
+            if (gameState === 'ai_thinking') {
+                return;
+            }
             event.stopPropagation();
             clearSquares();
             setAllowedSquares(event.target)
@@ -109,7 +129,16 @@ const startBoard = (game) => {
     });
 
     const startTurn = turn => {
+        gameState = turn + '_turn';
         turnSign.innerHTML = turn === 'white' ? "White's Turn" : "Black's Turn";
+
+        if (gameState !== 'checkmate' && options.playAgainst === 'ai' && turn === options.aiColor) {
+            setGameState('ai_thinking');
+            aiPlayer.play(game.pieces, aiPlay => {
+                setGameState('human_turn');
+                game.movePiece(aiPlay.move.pieceName, aiPlay.move.position);
+            });
+        }
     }
 
     game.on('pieceMove', move => {
@@ -141,6 +170,7 @@ const startBoard = (game) => {
         const endScene = document.getElementById('endscene');
         endScene.getElementsByClassName('winning-sign')[0].innerHTML = color + ' Wins';
         endScene.classList.add('show');
+        setGameState('checkmate');
     });
 
     startTurn('white');
@@ -181,10 +211,18 @@ const pieces = [
     { rank: 'rook', position: 88, color: 'black', name: 'blackRook2', ableToCastle: true },
     { rank: 'king', position: 85, color: 'black', name: 'blackKing', ableToCastle: true },
 ];
-
 const game = new Game(pieces, 'white');
 
 const startNewGame = () => {
     document.querySelectorAll('.scene').forEach( scene => scene.classList.remove('show') );
-    startBoard(game);
-}   
+
+    const playAgainst = document.querySelector('input[name="oponent"]:checked').value;
+    const humanColor = document.querySelector('input[name="human_color"]:checked')?.value;
+    const aiColor = humanColor === 'white' ? 'black' : 'white';
+    const aiLevel = 'dumb';
+    
+    startBoard(game, {playAgainst, aiColor, aiLevel});
+}
+
+const showColorSelect = () => document.querySelector('.select-color-container').classList.add('show');
+const hideColorSelect = () => document.querySelector('.select-color-container').classList.remove('show');

@@ -5,16 +5,30 @@
 	<link rel="stylesheet" type="text/css" href="chess.css">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta property="og:image" content="img/share.jpeg" />
-	<meta property="og:description" content="A complete chess game made with JavaScript for human vs human play." />
-	<meta name="author" content="Student Project">
+	<meta property="og:description" content="A complete well automated chess game made by JavaScript that contains AI. Check it out. I hope you like it." />
+	<meta name="author" content="Ahmed Alkholy">
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
 
 <div id="startscene" class="scene show">
-	<div class="scene-content" style="margin-top: 25vh;">
+	<div class="scene-content" style="margin-top: 15vh;">
 		<div style="margin-bottom: 50px;">
-			<h2>Chess Game</h2>
-			<p style="font-size: 18px; margin-bottom: 30px;">Human vs Human</p>
+			<h2>Play Against</h2>
+			<input type="radio" name="oponent" id="humanOponent" value="human" onchange="changeColorSelect()" checked>
+			<label for="humanOponent">Human</label>
+			&ensp;
+			<input type="radio" name="oponent" id="aiOponent" value="ai" onchange="changeColorSelect()">
+			<label for="aiOponent">AI</label>
+		</div>
+		
+		<div class="select-color-container" style="margin-bottom: 50px;display: none;">
+			<h2>Select Your Color</h2>
+			<input type="radio" name="human_color" id="humanColorWhite" value="white" checked>
+			<label for="humanColorWhite">White</label>
+			&ensp;
+			<input type="radio" name="human_color" id="humanColorBlack" value="black">
+			<label for="humanColorBlack">Black</label>
 		</div>
 
 		<div class="start-game-container">
@@ -208,6 +222,8 @@
 <script type="text/javascript" src="piece.js"></script>
 <script type="text/javascript" src="History.js"></script>
 <script type="text/javascript" src="Game.js"></script>
+<script type="text/javascript" src="SimulationGame.js"></script>
+<script type="text/javascript" src="ai.js"></script>
 <script type="text/javascript" src="Board.js"></script>
 
 <script type="text/javascript">
@@ -231,6 +247,20 @@
 			}
 		}	
 	}
+</script>
+
+<script>
+	const changeColorSelect = () => {
+		const playAgainst = document.querySelector('input[name="oponent"]:checked').value;
+		if (playAgainst === 'ai') {
+			showColorSelect();
+		}
+		else {
+			hideColorSelect();
+		}		
+	}
+
+	changeColorSelect();
 </script>
 
 </body>
